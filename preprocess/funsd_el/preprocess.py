@@ -12,14 +12,14 @@ VOCA = "bert-base-uncased"
 
 CLASSES = ["O", "HEADER", "QUESTION", "ANSWER"]
 CLASSES_VALID = ["HEADER", "QUESTION", "ANSWER"]
-INPUT_PATH = "path/to/dataset/funsd/"
-anno_dir = 'annotations'
+INPUT_PATH = "./dataset/funsd/"
+anno_dir = "annotations"
 # if not os.path.exists(INPUT_PATH):
 #     os.system("wget https://guillaumejaume.github.io/FUNSD/dataset.zip")
 #     os.system("unzip dataset.zip")
 #     os.system("rm -rf dataset.zip __MACOSX")
 
-OUTPUT_PATH = "path/to/dataset/funsd_geo"
+OUTPUT_PATH = "./dataset/funsd_geo"
 os.makedirs(OUTPUT_PATH, exist_ok=True)
 os.makedirs(os.path.join(OUTPUT_PATH, "preprocessed"), exist_ok=True)
 
@@ -50,14 +50,16 @@ def do_preprocess(tokenizer, dataset_split):
         in_json_obj = json.load(open(json_file, "r", encoding="utf-8"))
 
         out_json_obj = {}
-        out_json_obj['blocks'] = {'first_token_idx_list': [], 'boxes': []}
+        out_json_obj["blocks"] = {"first_token_idx_list": [], "boxes": []}
         out_json_obj["words"] = []
         out_json_obj["parse"] = {"class": {}}
         for c in CLASSES:
             out_json_obj["parse"]["class"][c] = []
         out_json_obj["parse"]["relations"] = []
 
-        form_id_to_word_idx = {} # record the word index of the first word of each block, starting from 0
+        form_id_to_word_idx = (
+            {}
+        )  # record the word index of the first word of each block, starting from 0
         other_seq_list = {}
         num_tokens = 0
 
@@ -66,13 +68,13 @@ def do_preprocess(tokenizer, dataset_split):
             form_id = form["id"]
             form_text = form["text"].strip()
             form_label = form["label"].upper()
-            if form_label.startswith('O'):
+            if form_label.startswith("O"):
                 form_label = "O"
             form_linking = form["linking"]
             form_box = form["box"]
 
             if len(form_text) == 0:
-                continue # filter text blocks with empty text
+                continue  # filter text blocks with empty text
 
             word_cnt = 0
             class_seq = []
@@ -84,17 +86,19 @@ def do_preprocess(tokenizer, dataset_split):
                 tokens = tokenizer.convert_tokens_to_ids(tokenizer.tokenize(word_text))
 
                 word_obj = {"text": word_text, "tokens": tokens, "boundingBox": bb}
-                if len(word_text) != 0: # filter empty words
+                if len(word_text) != 0:  # filter empty words
                     out_json_obj["words"].append(word_obj)
                     if real_word_idx == 0:
-                        out_json_obj['blocks']['first_token_idx_list'].append(num_tokens + 1)
+                        out_json_obj["blocks"]["first_token_idx_list"].append(
+                            num_tokens + 1
+                        )
                     num_tokens += len(tokens)
 
                     word_cnt += 1
-                    class_seq.append(len(out_json_obj["words"]) - 1) # word index
+                    class_seq.append(len(out_json_obj["words"]) - 1)  # word index
                     real_word_idx += 1
             if real_word_idx > 0:
-                out_json_obj['blocks']['boxes'].append(form_box)
+                out_json_obj["blocks"]["boxes"].append(form_box)
 
             is_valid_class = False if form_label not in CLASSES else True
             if is_valid_class:
