@@ -19,12 +19,12 @@ model:
     max_prob_as_father_upperbound: false
 
 train:
-    batch_size: 2
+    batch_size: 6
     num_samples_per_epoch: 149
     max_seq_length: 512
     max_block_num: 150
     max_epochs: 200
-    use_fp16: True
+    use_fp16: False
     accelerator: gpu
     strategy:
         type: ''
@@ -47,7 +47,7 @@ train:
     val_interval: 1 # in epochs
 
 val:
-    batch_size: 4
+    batch_size: 6
     num_workers: 4
     limit_val_batches: 1.0
     dump_dir: ./funsd_result/
