@@ -21,10 +21,7 @@ def linear_lr_lambda(current_step, warmup_steps, training_steps):
 
 def linear_scheduler(optimizer, warmup_steps, training_steps, last_epoch=-1):
     """linear_scheduler with warmup from huggingface"""
-    def lr_lambda(current_step):
-        return linear_lr_lambda(current_step, warmup_steps, training_steps)
-    
-    return LambdaLR(optimizer, lr_lambda, last_epoch)
+    return LambdaLR(optimizer, lambda current_step: linear_lr_lambda(current_step, warmup_steps, training_steps), last_epoch)
 
 
 def cosine_scheduler(
