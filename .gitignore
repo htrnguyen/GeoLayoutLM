@@ -1,0 +1,6 @@
+dataset/
+funsd_result/
+funsd_workspace/
+model/*
+!model/__init__.py
+!model/geolayoutlm_vie.py

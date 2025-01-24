@@ -10,19 +10,18 @@ import numpy as np
 from torch.optim.lr_scheduler import LambdaLR
 
 
+def linear_lr_lambda(current_step, warmup_steps, training_steps):
+    if current_step < warmup_steps:
+        return float(current_step) / float(max(1, warmup_steps))
+    return max(
+        0.0,
+        float(training_steps - current_step)
+        / float(max(1, training_steps - warmup_steps)),
+    )
+
 def linear_scheduler(optimizer, warmup_steps, training_steps, last_epoch=-1):
     """linear_scheduler with warmup from huggingface"""
-
-    def lr_lambda(current_step):
-        if current_step < warmup_steps:
-            return float(current_step) / float(max(1, warmup_steps))
-        return max(
-            0.0,
-            float(training_steps - current_step)
-            / float(max(1, training_steps - warmup_steps)),
-        )
-
-    return LambdaLR(optimizer, lr_lambda, last_epoch)
+    return LambdaLR(optimizer, lambda current_step: linear_lr_lambda(current_step, warmup_steps, training_steps), last_epoch)
 
 
 def cosine_scheduler(
