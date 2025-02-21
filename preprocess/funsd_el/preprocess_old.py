@@ -10,8 +10,8 @@ MAX_SEQ_LENGTH = 512
 MODEL_TYPE = "bert"
 VOCA = "bert-base-uncased"
 
-CLASSES = ["O", "brand", "name", "mfg_label", "mfg", "exp_label", "exp", "weight_label", "weight", "other"]
-CLASSES_VALID = ["brand", "name", "mfg_label", "mfg", "exp_label", "exp", "weight_label", "weight", "other"]
+CLASSES = ["O", "HEADER", "QUESTION", "ANSWER"]
+CLASSES_VALID = ["HEADER", "QUESTION", "ANSWER"]
 INPUT_PATH = "../../dataset/funsd/"
 anno_dir = "annotations"
 # if not os.path.exists(INPUT_PATH):
@@ -117,27 +117,21 @@ def do_preprocess(tokenizer, dataset_split):
                 continue
 
             for link_idx, link in enumerate(form_linking):
-                # Kiểm tra nếu liên kết hợp lệ (có đúng 2 phần tử)
-                if isinstance(link, list) and len(link) == 2:
-                    if link[0] == form_id:
-                        if (
-                            link[1] in form_id_to_word_idx
-                            and link[0] in form_id_to_word_idx
-                        ):
-                            relation_pair = [
-                                form_id_to_word_idx[link[0]],
-                                form_id_to_word_idx[link[1]],
-                            ]
-                            out_json_obj["parse"]["relations"].append(relation_pair)
-                else:
-                    # Ghi log liên kết không hợp lệ để debug
-                    print(f"Invalid link format: {link} in form ID: {form_id}")
-
+                if link[0] == form_id:
+                    if (
+                        link[1] in form_id_to_word_idx
+                        and link[0] in form_id_to_word_idx
+                    ):
+                        relation_pair = [
+                            form_id_to_word_idx[link[0]],
+                            form_id_to_word_idx[link[1]],
+                        ]
+                        out_json_obj["parse"]["relations"].append(relation_pair)
 
         # meta
         out_json_obj["meta"] = {}
         image_file = (
-            os.path.splitext(json_file.replace(f"/{anno_dir}/", "/images/"))[0] + ".jpg"
+            os.path.splitext(json_file.replace(f"/{anno_dir}/", "/images/"))[0] + ".png"
         )
         if dataset_split == "train":
             out_json_obj["meta"]["image_path"] = image_file[
